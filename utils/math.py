@@ -7,11 +7,14 @@ def cosine_similarity(v, m):
     m: 2D array
     Returns: 1D array of similarities
     """
-    # TODO: Calculate the L2 norm of the vector v
-    # TODO: Calculate the L2 norm of each row in the matrix m
-    # TODO: Handle division by zero
-    # TODO: Return the cosine similarity (dot product divided by norm products)
-    pass
+    v_norm = np.linalg.norm(v)
+    m_norm = np.linalg.norm(m, axis=1)
+
+    # Prevent division by zero
+    v_norm = v_norm if v_norm > 0 else 1e-10
+    m_norm = np.where(m_norm == 0, 1e-10, m_norm)
+    
+    return np.dot(m, v) / (v_norm * m_norm)
 
 def get_nearest_neighbors(target_vector, embeddings_matrix, index_to_word, exclude_words=None, topn=10):
     """
@@ -20,12 +23,20 @@ def get_nearest_neighbors(target_vector, embeddings_matrix, index_to_word, exclu
     if exclude_words is None:
         exclude_words = set()
         
-    # TODO: Calculate the cosine similarities between the target vector and all embeddings
-    # TODO: Sort the similarities in descending order to get the indices of the closest words
-    # TODO: Iterate through the sorted indices, retrieving the corresponding words mapping
-    # TODO: Skip words that are in the exclude_words set
-    # TODO: Return a list of tuples containing the word and its similarity score, up to `topn` results
-    pass
+    sims = cosine_similarity(target_vector, embeddings_matrix)
+
+    # Sort descending
+    best_indices = np.argsort(sims)[::-1]
+    
+    results = []
+    for idx in best_indices:
+        word = index_to_word[idx]
+        if word not in exclude_words:
+            results.append((word, float(sims[idx])))
+        if len(results) == topn:
+            break
+            
+    return results
 
 def calculate_projection(word_vec, pole1_vec, pole2_vec):
     """
@@ -33,8 +44,12 @@ def calculate_projection(word_vec, pole1_vec, pole2_vec):
     Formula: (W . D) / (||W|| * ||D||) 
     where D = pole1_vec - pole2_vec
     """
-    # TODO: Determine the axis vector by subtracting pole2_vec from pole1_vec
-    # TODO: Calculate the L2 norm for the word vector and the axis vector
-    # TODO: If the norm of either vector is zero, return 0.0 to prevent division by zero
-    # TODO: Calculate and return the projection score using the given formula
-    pass
+    axis_vector = pole1_vec - pole2_vec
+    w_norm = np.linalg.norm(word_vec)
+    d_norm = np.linalg.norm(axis_vector)
+    
+    if w_norm == 0 or d_norm == 0:
+        return 0.0
+        
+    score = np.dot(word_vec, axis_vector) / (w_norm * d_norm)
+    return float(score)

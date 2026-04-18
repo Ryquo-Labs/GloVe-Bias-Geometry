@@ -34,8 +34,8 @@ with st.spinner("Loading word embeddings from chunks..."):
 # -----------------------------------------------------------------
 # Title
 # -----------------------------------------------------------------
-# TODO: Add a Streamlit title (e.g., "GloVe Embedding Explorer 🧠")
-# TODO: Add a markdown description describing what the app does.
+st.title("GloVe Embedding Explorer 🧠")
+st.markdown("Interact with pre-trained GloVe word embeddings via analogy math or bias projections.")
 
 st.divider()
 
@@ -64,8 +64,7 @@ if st.button("Compute Analogy", type="primary"):
     word_c = sanitize_input(word_c_input)
     
     if not all([word_a, word_b, word_c]):
-        # TODO: Show a Streamlit warning message indicating that all three words need to be provided
-        pass
+        st.warning("Please provide all three words.")
     else:
         valid_words, invalid_words = validate_words([word_a, word_b, word_c], vocab)
         
@@ -86,8 +85,7 @@ if st.button("Compute Analogy", type="primary"):
             # Show output
             df = pd.DataFrame(results, columns=["Word", "Cosine Similarity"])
             df.index = np.arange(1, len(df) + 1)
-            # TODO: Render this `df` DataFrame in the Streamlit app
-            pass
+            st.dataframe(df.style.format({"Cosine Similarity": "{:.4f}"}), width='stretch')
 
 st.divider()
 
